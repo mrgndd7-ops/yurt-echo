@@ -6,7 +6,7 @@ import BottomNav from "@/components/layout/BottomNav";
 import NewsCard from "@/components/news/NewsCard";
 import SectionTitle from "@/components/news/SectionTitle";
 import CategoryTag from "@/components/news/CategoryTag";
-import { Clock, Play, TrendingUp, Calendar, Shield, BookOpen } from "lucide-react";
+import { Clock, Play, TrendingUp, Calendar, Shield, BookOpen, MapPin, Landmark } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const IMG = "https://images.unsplash.com/photo-1524661135-423995f22d0b?w=800&q=80";
@@ -419,8 +419,8 @@ const Index = () => {
                 { icon: Calendar, label: "Bugün Tarihte", desc: "26 Mart'ın tarihteki yeri" },
                 { icon: BookOpen, label: "Milli Hafıza", desc: "Unutulmaması gereken günler" },
                 { icon: TrendingUp, label: "Jeopolitik Notlar", desc: "Bölgesel güç dengesi" },
-                { icon: Shield, label: "Sınır Hattı", desc: "Güncel sınır gelişmeleri" },
-                { icon: Shield, label: "Devlet ve Strateji", desc: "Kurumsal hafıza arşivi" },
+                { icon: MapPin, label: "Sınır Hattı", desc: "Güncel sınır gelişmeleri" },
+                { icon: Landmark, label: "Devlet ve Strateji", desc: "Kurumsal hafıza arşivi" },
               ].map((item, i) => (
                 <Link key={i} to="/kategori/tarih" className="group bg-secondary-foreground/5 rounded-lg p-4 hover:bg-secondary-foreground/10 transition-colors">
                   <item.icon className="h-5 w-5 text-primary mb-2" />
