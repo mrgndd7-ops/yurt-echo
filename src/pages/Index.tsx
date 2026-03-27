@@ -467,27 +467,6 @@ const Index = () => {
                 </Link>
               </div>
 
-              <div className="bg-card rounded-lg border border-border p-4">
-                <h3 className="text-sm font-bold font-archivo flex items-center gap-1.5 mb-3">
-                  <BookOpen className="h-4 w-4 text-primary" />
-                  Yazarlardan
-                </h3>
-                {[
-                  { name: "Mehmet Karataş", article: "Sınır hattının değişen dinamikleri" },
-                  { name: "Ayşe Demir", article: "Küresel denge ve Türkiye" },
-                  { name: "Hasan Yılmaz", article: "Tarih bilinci ve gelecek" },
-                ].map((w, i) => (
-                  <Link key={i} to="/yazarlar" className="group flex items-center gap-2.5 py-2 border-b border-border last:border-0">
-                    <div className="w-8 h-8 rounded-full bg-secondary text-secondary-foreground flex items-center justify-center text-[10px] font-bold flex-shrink-0">
-                      {w.name.split(" ").map(n => n[0]).join("")}
-                    </div>
-                    <div>
-                      <p className="text-[10px] font-bold text-muted-foreground">{w.name}</p>
-                      <p className="text-xs group-hover:text-primary transition-colors">{w.article}</p>
-                    </div>
-                  </Link>
-                ))}
-              </div>
             </aside>
           </div>
         </div>
