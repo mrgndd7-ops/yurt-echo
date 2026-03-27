@@ -11,10 +11,11 @@ interface NewsCardProps {
   author?: string;
   size?: "large" | "medium" | "small" | "compact";
   categoryVariant?: "burgundy" | "navy" | "muted";
+  href?: string; // dış URL varsa buraya, yoksa iç route kullanılır
 }
 
 function slugify(title: string) {
-  return encodeURIComponent(title.slice(0, 60).toLowerCase().replace(/\s+/g, "-"));
+  return encodeURIComponent(title.slice(0, 60).toLowerCase().replace(/s+/g, "-"));
 }
 
 const NewsCard = ({
@@ -26,12 +27,20 @@ const NewsCard = ({
   author,
   size = "medium",
   categoryVariant = "burgundy",
+  href,
 }: NewsCardProps) => {
-  const href = `/haber/${slugify(title)}`;
+  const internalHref = `/haber/${slugify(title)}`;
+
+  const Wrapper = ({ children, className }: { children: React.ReactNode; className: string }) =>
+    href ? (
+      <a href={href} target="_blank" rel="noopener noreferrer" className={className}>{children}</a>
+    ) : (
+      <Link to={internalHref} className={className}>{children}</Link>
+    );
 
   if (size === "compact") {
     return (
-      <Link to={href} className="group flex gap-3 py-3 border-b border-border last:border-0">
+      <Wrapper className="group flex gap-3 py-3 border-b border-border last:border-0">
         {imageUrl && (
           <div className="w-20 h-14 rounded overflow-hidden flex-shrink-0">
             <img src={imageUrl} alt={title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
@@ -41,13 +50,13 @@ const NewsCard = ({
           <CategoryTag label={category} variant={categoryVariant} className="mb-1" />
           <h4 className="text-sm font-semibold font-archivo leading-tight line-clamp-2 group-hover:text-primary transition-colors">{title}</h4>
         </div>
-      </Link>
+      </Wrapper>
     );
   }
 
   if (size === "small") {
     return (
-      <Link to={href} className="group block">
+      <Wrapper className="group block">
         {imageUrl && (
           <div className="aspect-[16/10] rounded-lg overflow-hidden mb-2.5">
             <img src={imageUrl} alt={title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
@@ -58,13 +67,13 @@ const NewsCard = ({
         <div className="flex items-center gap-2 mt-1.5 text-xs text-muted-foreground">
           <Clock className="h-3 w-3" /><span>{date}</span>
         </div>
-      </Link>
+      </Wrapper>
     );
   }
 
   if (size === "large") {
     return (
-      <Link to={href} className="group block">
+      <Wrapper className="group block">
         {imageUrl && (
           <div className="aspect-[16/9] rounded-lg overflow-hidden mb-4">
             <img src={imageUrl} alt={title} className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500" />
@@ -77,12 +86,12 @@ const NewsCard = ({
           {author && <span className="font-medium text-foreground">{author}</span>}
           <span className="flex items-center gap-1"><Clock className="h-3 w-3" />{date}</span>
         </div>
-      </Link>
+      </Wrapper>
     );
   }
 
   return (
-    <Link to={href} className="group block">
+    <Wrapper className="group block">
       {imageUrl && (
         <div className="aspect-[16/10] rounded-lg overflow-hidden mb-3">
           <img src={imageUrl} alt={title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
@@ -94,7 +103,7 @@ const NewsCard = ({
       <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
         <Clock className="h-3 w-3" /><span>{date}</span>
       </div>
-    </Link>
+    </Wrapper>
   );
 };
 
