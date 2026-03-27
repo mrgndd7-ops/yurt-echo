@@ -1,4 +1,4 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+﻿import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -9,7 +9,7 @@ import ArticleDetail from "./pages/ArticleDetail.tsx";
 import CategoryPage from "./pages/CategoryPage.tsx";
 import Yazarlar from "./pages/Yazarlar.tsx";
 import Menu from "./pages/Menu.tsx";
-import NotFound from "./pages/NotFound.tsx";
+import BugunTarihte from "./pages/BugunTarihte.tsx";n            <Route path="/yazarlar" element=\{<Yazarlar />\} />
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -43,3 +43,4 @@ const App = () => (
 );
 
 export default App;
+
