@@ -10,7 +10,6 @@ const navItems = [
   { label: "Savunma", href: "/kategori/savunma" },
   { label: "Dünya", href: "/kategori/dunya" },
   { label: "Tarih", href: "/kategori/tarih" },
-  { label: "Yazarlar", href: "/yazarlar" },
   { label: "Analiz", href: "/kategori/analiz" },
 ];
 
