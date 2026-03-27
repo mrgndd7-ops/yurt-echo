@@ -39,18 +39,17 @@ function resolveImage(item: any): string {
 }
 
 function isValidImage(url: unknown): url is string {
-  if (!url || typeof url !== "string") return false;
+  if (!url || typeof url !== "string" || url.length < 10) return false;
   try {
     const { pathname } = new URL(url);
-    // Reject bare domains (path too short) and non-image paths
     if (pathname.length < 5) return false;
-    return /.(jpe?g|png|gif|webp|avif)/i.test(pathname) ||
-      //(uploads?|images?|photos?|media|cdn|thumb|crop)//i.test(pathname);
-  } catch {
+    if (/.(jpe?g|png|gif|webp|avif)/i.test(pathname)) return true;
+    if (/(upload|image|photo|media|cdn|thumb|crop)/i.test(pathname)) return true;
+    return false;
+  } catch (_e) {
     return false;
   }
 }
-
 function stripHtml(html: string): string {
   return html.replace(/<[^>]*>/g, "").replace(/&[a-z]+;/gi, " ").trim();
 }
