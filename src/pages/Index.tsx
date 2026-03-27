@@ -9,6 +9,7 @@ import CategoryTag from "@/components/news/CategoryTag";
 import { Clock, Play, TrendingUp, Calendar, Shield, BookOpen, MapPin, Landmark } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useRssFeed } from "@/hooks/useRssFeed";
+import { useOnThisDay } from "@/hooks/useOnThisDay";
 import { RSS_FEEDS } from "@/config/rssFeeds";
 import type { RssItem } from "@/lib/rssParser";
 
@@ -127,6 +128,7 @@ const STATIC_STRIP = [
 ];
 
 const Index = () => {
+  const onThisDay = useOnThisDay(4);
   const gundem   = useRssFeed(RSS_FEEDS.gundem);
   const siyaset  = useRssFeed(RSS_FEEDS.siyaset);
   const guvenlik = useRssFeed(RSS_FEEDS.guvenlik);
@@ -418,18 +420,20 @@ const Index = () => {
                   <Calendar className="h-4 w-4 text-primary" />
                   Bugün Tarihte
                 </h3>
-                <div className="space-y-3">
-                  {[
-                    { year: "1915", text: "Çanakkale Kara Muharebelerinin başlaması" },
-                    { year: "1921", text: "İstiklal Marşı'nın kabulü" },
-                    { year: "1938", text: "Hatay Devleti'nin kurulması" },
-                  ].map((h, i) => (
-                    <div key={i} className="flex gap-2">
-                      <span className="text-xs font-bold text-primary w-10 flex-shrink-0">{h.year}</span>
-                      <p className="text-xs text-foreground leading-snug">{h.text}</p>
-                    </div>
-                  ))}
-                </div>
+                {onThisDay.loading && <div className="animate-pulse space-y-2">{[1,2,3].map(i=><div key={i} className="h-8 bg-muted rounded" />)}</div>}
+                {!onThisDay.loading && (
+                  <div className="space-y-3">
+                    {onThisDay.events.map((e, i) => (
+                      <div key={i} className="flex gap-2">
+                        <span className="text-xs font-bold text-primary w-10 flex-shrink-0">{e.year}</span>
+                        {e.pageUrl
+                          ? <a href={e.pageUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-foreground leading-snug hover:text-primary transition-colors line-clamp-2">{e.text}</a>
+                          : <p className="text-xs text-foreground leading-snug line-clamp-2">{e.text}</p>
+                        }
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               <div className="bg-secondary text-secondary-foreground rounded-lg p-4">
