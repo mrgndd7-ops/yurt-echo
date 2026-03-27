@@ -22,15 +22,33 @@ export async function fetchRssFeed(url: string): Promise<RssItem[]> {
     link: item.link ?? "",
     description: stripHtml(item.description ?? "").slice(0, 200),
     pubDate: item.pubDate ?? "",
-    imageUrl:
-      item.thumbnail ||
-      item.enclosure?.link ||
-      extractImage(item.content ?? "") ||
-      extractImage(item.description ?? "") ||
-      "",
+    imageUrl: resolveImage(item),
     author: item.author ?? "",
     category: item.categories?.[0] ?? "",
   }));
+}
+
+function resolveImage(item: any): string {
+  const candidates = [
+    item.thumbnail,
+    item.enclosure?.link,
+    extractImage(item.content ?? ""),
+    extractImage(item.description ?? ""),
+  ];
+  return candidates.find(isValidImage) ?? "";
+}
+
+function isValidImage(url: unknown): url is string {
+  if (!url || typeof url !== "string") return false;
+  try {
+    const { pathname } = new URL(url);
+    // Reject bare domains (path too short) and non-image paths
+    if (pathname.length < 5) return false;
+    return /.(jpe?g|png|gif|webp|avif)/i.test(pathname) ||
+      //(uploads?|images?|photos?|media|cdn|thumb|crop)//i.test(pathname);
+  } catch {
+    return false;
+  }
 }
 
 function stripHtml(html: string): string {
