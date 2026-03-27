@@ -7,7 +7,6 @@ const footerLinks = [
   { label: "Gizlilik", href: "/gizlilik" },
   { label: "İletişim", href: "/iletisim" },
   { label: "Reklam", href: "/reklam" },
-  { label: "RSS", href: "/rss" },
 ];
 
 const socialLinks = [
