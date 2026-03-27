@@ -1,14 +1,6 @@
 import { Link } from "react-router-dom";
 import logo from "@/assets/yurt-logo.png";
 
-const footerLinks = [
-  { label: "Künye", href: "/kunye" },
-  { label: "Yayın İlkeleri", href: "/yayin-ilkeleri" },
-  { label: "Gizlilik", href: "/gizlilik" },
-  { label: "İletişim", href: "/iletisim" },
-  { label: "Reklam", href: "/reklam" },
-];
-
 const socialLinks = [
   { label: "X", href: "https://x.com/yurtmedya" },
   { label: "YT", href: "https://youtube.com/@yurtmedya" },
@@ -26,13 +18,6 @@ const Footer = () => {
             <p className="text-sm text-secondary-foreground/70 font-inter italic">
               Milletin hafızası, memleketin gündemi
             </p>
-          </div>
-          <div className="flex flex-wrap gap-x-6 gap-y-2 md:justify-center">
-            {footerLinks.map((link) => (
-              <Link key={link.label} to={link.href} className="text-sm text-secondary-foreground/70 hover:text-primary-foreground transition-colors">
-                {link.label}
-              </Link>
-            ))}
           </div>
           <div className="space-y-3 md:text-right">
             <div className="flex gap-3 md:justify-end">
