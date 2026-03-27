@@ -8,6 +8,9 @@ import SectionTitle from "@/components/news/SectionTitle";
 import CategoryTag from "@/components/news/CategoryTag";
 import { Clock, Play, TrendingUp, Calendar, Shield, BookOpen, MapPin, Landmark } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useRssFeed } from "@/hooks/useRssFeed";
+import { RSS_FEEDS } from "@/config/rssFeeds";
+import type { RssItem } from "@/lib/rssParser";
 
 const IMG = "https://images.unsplash.com/photo-1524661135-423995f22d0b?w=800&q=80";
 const IMG2 = "https://images.unsplash.com/photo-1555848962-6e79363ec58f?w=800&q=80";
@@ -16,7 +19,134 @@ const IMG4 = "https://images.unsplash.com/photo-1541872703-74c5e44368f9?w=800&q=
 const IMG5 = "https://images.unsplash.com/photo-1577495508048-b635879837f1?w=800&q=80";
 const IMG6 = "https://images.unsplash.com/photo-1564769625905-50e93615e769?w=800&q=80";
 
+// RSS item'ı link olarak kullan (dış siteye yönlendir)
+function itemHref(item: RssItem) {
+  return item.link || "/haber/detay";
+}
+
+function formatDate(pubDate: string) {
+  if (!pubDate) return "";
+  const d = new Date(pubDate);
+  return isNaN(d.getTime()) ? pubDate : d.toLocaleDateString("tr-TR", { day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" });
+}
+
+// Her bölüm için ortak skeleton
+function SectionSkeleton() {
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-5 animate-pulse">
+      <div className="md:col-span-1 aspect-video bg-muted rounded-lg" />
+      <div className="md:col-span-2 space-y-3">
+        {[1, 2, 3].map(i => <div key={i} className="h-14 bg-muted rounded-lg" />)}
+      </div>
+    </div>
+  );
+}
+
+// Haber bölümü: 1 büyük kart + n küçük kart
+function NewsSection({
+  title,
+  href,
+  accent,
+  label,
+  labelVariant,
+  fallbackImage,
+  items,
+  loading,
+  staticMain,
+  staticList,
+}: {
+  title: string;
+  href: string;
+  accent?: "navy";
+  label: string;
+  labelVariant?: "navy";
+  fallbackImage: string;
+  items: RssItem[];
+  loading: boolean;
+  staticMain: { title: string; excerpt?: string };
+  staticList: string[];
+}) {
+  if (loading) return <SectionSkeleton />;
+
+  const hasRss = items.length > 0;
+  const main = hasRss ? items[0] : null;
+  const rest = hasRss ? items.slice(1, 4) : [];
+
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+      <div className="md:col-span-1">
+        {main ? (
+          <a href={itemHref(main)} target="_blank" rel="noopener noreferrer">
+            <NewsCard
+              size="medium"
+              category={label}
+              title={main.title}
+              excerpt={main.description || undefined}
+              imageUrl={main.imageUrl || fallbackImage}
+              author={main.author || undefined}
+              date={formatDate(main.pubDate)}
+              categoryVariant={labelVariant}
+            />
+          </a>
+        ) : (
+          <Link to={href}>
+            <NewsCard
+              size="medium"
+              category={label}
+              title={staticMain.title}
+              excerpt={staticMain.excerpt}
+              imageUrl={fallbackImage}
+              categoryVariant={labelVariant}
+            />
+          </Link>
+        )}
+      </div>
+      <div className="md:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {hasRss
+          ? rest.map((item, i) => (
+              <a key={i} href={itemHref(item)} target="_blank" rel="noopener noreferrer">
+                <NewsCard
+                  size="small"
+                  category={label}
+                  title={item.title}
+                  imageUrl={item.imageUrl || undefined}
+                  categoryVariant={labelVariant}
+                />
+              </a>
+            ))
+          : staticList.map((t, i) => (
+              <Link key={i} to={href}>
+                <NewsCard size="small" category={label} title={t} categoryVariant={labelVariant} />
+              </Link>
+            ))}
+      </div>
+    </div>
+  );
+}
+
 const Index = () => {
+  const gundem   = useRssFeed(RSS_FEEDS.gundem);
+  const siyaset  = useRssFeed(RSS_FEEDS.siyaset);
+  const guvenlik = useRssFeed(RSS_FEEDS.guvenlik);
+  const savunma  = useRssFeed(RSS_FEEDS.savunma);
+  const dunya    = useRssFeed(RSS_FEEDS.dunya);
+  const tarih    = useRssFeed(RSS_FEEDS.tarih);
+
+  // Hero: ilk dolu feed'den al
+  const heroFeed = [gundem, guvenlik, savunma, dunya].find(f => f.items.length > 0);
+  const heroItem = heroFeed?.items[0];
+  const sideItems = heroFeed?.items.slice(1, 4) ?? [];
+
+  // Quick strip: tüm feed'lerin ilk haberlerini karıştır
+  const allItems = [
+    ...gundem.items.slice(0, 1),
+    ...siyaset.items.slice(0, 1),
+    ...guvenlik.items.slice(0, 1),
+    ...savunma.items.slice(0, 1),
+    ...dunya.items.slice(0, 1),
+    ...tarih.items.slice(0, 1),
+  ];
+
   return (
     <div className="min-h-screen bg-background pb-16 lg:pb-0">
       <UtilityBar />
@@ -27,40 +157,51 @@ const Index = () => {
         {/* Hero Section */}
         <section className="container py-6">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-            {/* Main hero */}
             <div className="lg:col-span-2">
-              <NewsCard
-                size="large"
-                category="Güvenlik"
-                title="Sınır güvenliğinde yeni dönem: devletin sahadaki refleksi yeniden şekilleniyor"
-                excerpt="Güvenlik bürokrasisinin yeniden yapılandırılmasıyla birlikte sınır hattındaki operasyonel kapasite güçlendiriliyor. Yeni dönemin stratejik çerçevesi netleşiyor."
-                imageUrl={IMG}
-                author="Mehmet Karataş"
-                date="26 Mart 2026, 13:45"
-              />
+              {heroItem ? (
+                <a href={itemHref(heroItem)} target="_blank" rel="noopener noreferrer">
+                  <NewsCard
+                    size="large"
+                    category={heroItem.category || "Gündem"}
+                    title={heroItem.title}
+                    excerpt={heroItem.description || undefined}
+                    imageUrl={heroItem.imageUrl || IMG}
+                    author={heroItem.author || undefined}
+                    date={formatDate(heroItem.pubDate)}
+                  />
+                </a>
+              ) : (
+                <NewsCard
+                  size="large"
+                  category="Güvenlik"
+                  title="Sınır güvenliğinde yeni dönem: devletin sahadaki refleksi yeniden şekilleniyor"
+                  excerpt="Güvenlik bürokrasisinin yeniden yapılandırılmasıyla birlikte sınır hattındaki operasyonel kapasite güçlendiriliyor."
+                  imageUrl={IMG}
+                  author="Mehmet Karataş"
+                  date="26 Mart 2026, 13:45"
+                />
+              )}
             </div>
-            {/* Side stories */}
             <div className="flex flex-col gap-4">
-              <NewsCard
-                size="small"
-                category="Savunma"
-                title="Yerli savunma sanayiinde kritik ihracat anlaşması imzalandı"
-                imageUrl={IMG2}
-                categoryVariant="navy"
-              />
-              <NewsCard
-                size="small"
-                category="Dünya"
-                title="Doğu Akdeniz'de enerji denklemi yeniden şekilleniyor"
-                imageUrl={IMG3}
-                categoryVariant="navy"
-              />
-              <NewsCard
-                size="small"
-                category="Tarih"
-                title="Çanakkale'nin 111. yılında milli hafıza ve direniş ruhu"
-                imageUrl={IMG6}
-              />
+              {sideItems.length > 0
+                ? sideItems.map((item, i) => (
+                    <a key={i} href={itemHref(item)} target="_blank" rel="noopener noreferrer">
+                      <NewsCard
+                        size="small"
+                        category={item.category || "Haber"}
+                        title={item.title}
+                        imageUrl={item.imageUrl || [IMG2, IMG3, IMG6][i]}
+                        categoryVariant="navy"
+                      />
+                    </a>
+                  ))
+                : (
+                  <>
+                    <NewsCard size="small" category="Savunma" title="Yerli savunma sanayiinde kritik ihracat anlaşması imzalandı" imageUrl={IMG2} categoryVariant="navy" />
+                    <NewsCard size="small" category="Dünya" title="Doğu Akdeniz'de enerji denklemi yeniden şekilleniyor" imageUrl={IMG3} categoryVariant="navy" />
+                    <NewsCard size="small" category="Tarih" title="Çanakkale'nin 111. yılında milli hafıza ve direniş ruhu" imageUrl={IMG6} />
+                  </>
+                )}
             </div>
           </div>
         </section>
@@ -69,25 +210,40 @@ const Index = () => {
         <section className="bg-soft-surface border-y border-border">
           <div className="container py-4">
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
-              {[
-                { cat: "Gündem", title: "Ankara'da kritik güvenlik zirvesi başladı" },
-                { cat: "Siyaset", title: "Meclis'te yeni yasa teklifi tartışılıyor" },
-                { cat: "Ekonomi", title: "Merkez Bankası faiz kararını açıkladı" },
-                { cat: "Güvenlik", title: "Sınır hattında dikkat çeken gelişme" },
-                { cat: "Dünya", title: "Jeopolitikte yeni eşik: Balkan cephesi" },
-                { cat: "Savunma", title: "Savunmada yerli kapasite artıyor" },
-              ].map((item, i) => (
-                <Link
-                  key={i}
-                  to="/haber/detay"
-                  className="group bg-card rounded-lg p-3 border border-border hover:shadow-sm transition-all hover:-translate-y-0.5"
-                >
-                  <CategoryTag label={item.cat} variant="muted" className="mb-1.5" />
-                  <p className="text-xs font-semibold font-archivo leading-snug line-clamp-2 group-hover:text-primary transition-colors">
-                    {item.title}
-                  </p>
-                </Link>
-              ))}
+              {allItems.length > 0
+                ? allItems.map((item, i) => (
+                    <a
+                      key={i}
+                      href={itemHref(item)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="group bg-card rounded-lg p-3 border border-border hover:shadow-sm transition-all hover:-translate-y-0.5"
+                    >
+                      <CategoryTag label={item.category || "Haber"} variant="muted" className="mb-1.5" />
+                      <p className="text-xs font-semibold font-archivo leading-snug line-clamp-2 group-hover:text-primary transition-colors">
+                        {item.title}
+                      </p>
+                    </a>
+                  ))
+                : [
+                    { cat: "Gündem", title: "Ankara'da kritik güvenlik zirvesi başladı" },
+                    { cat: "Siyaset", title: "Meclis'te yeni yasa teklifi tartışılıyor" },
+                    { cat: "Ekonomi", title: "Merkez Bankası faiz kararını açıkladı" },
+                    { cat: "Güvenlik", title: "Sınır hattında dikkat çeken gelişme" },
+                    { cat: "Dünya", title: "Jeopolitikte yeni eşik: Balkan cephesi" },
+                    { cat: "Savunma", title: "Savunmada yerli kapasite artıyor" },
+                  ].map((item, i) => (
+                    <Link
+                      key={i}
+                      to="/haber/detay"
+                      className="group bg-card rounded-lg p-3 border border-border hover:shadow-sm transition-all hover:-translate-y-0.5"
+                    >
+                      <CategoryTag label={item.cat} variant="muted" className="mb-1.5" />
+                      <p className="text-xs font-semibold font-archivo leading-snug line-clamp-2 group-hover:text-primary transition-colors">
+                        {item.title}
+                      </p>
+                    </Link>
+                  ))}
             </div>
           </div>
         </section>
@@ -95,134 +251,96 @@ const Index = () => {
         {/* Main Content + Sidebar */}
         <div className="container py-8">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Main content */}
             <div className="lg:col-span-2 space-y-10">
+
               {/* Gündem / Siyaset */}
               <section>
                 <SectionTitle title="Gündem / Siyaset" href="/kategori/gundem" />
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                  <NewsCard
-                    size="medium"
-                    category="Gündem"
-                    title="Devlet refleksinin öne çıktığı başlıklar: güvenlik ve diplomasi bir arada"
-                    excerpt="Hükümetin son haftalardaki stratejik hamleleri, iç ve dış politikada yeni bir denge arayışına işaret ediyor."
-                    imageUrl={IMG4}
-                  />
-                  <div className="space-y-0">
-                    {[
-                      "Meclis'te yeni güvenlik paketi görüşmeleri başladı",
-                      "Cumhurbaşkanlığı'ndan diplomatik temas açıklaması",
-                      "Yerel yönetimlerde yeni dönem planlaması",
-                      "Ekonomi zirvesinde stratejik kararlar masada",
-                    ].map((t, i) => (
-                      <NewsCard
-                        key={i}
-                        size="compact"
-                        category="Siyaset"
-                        title={t}
-                        categoryVariant="navy"
-                      />
-                    ))}
-                  </div>
+                  {gundem.loading ? (
+                    <div className="col-span-2 animate-pulse h-40 bg-muted rounded-lg" />
+                  ) : gundem.items.length > 0 ? (
+                    <>
+                      <a href={itemHref(gundem.items[0])} target="_blank" rel="noopener noreferrer">
+                        <NewsCard
+                          size="medium"
+                          category="Gündem"
+                          title={gundem.items[0].title}
+                          excerpt={gundem.items[0].description || undefined}
+                          imageUrl={gundem.items[0].imageUrl || IMG4}
+                        />
+                      </a>
+                      <div className="space-y-0">
+                        {gundem.items.slice(1, 5).map((item, i) => (
+                          <a key={i} href={itemHref(item)} target="_blank" rel="noopener noreferrer">
+                            <NewsCard size="compact" category="Gündem" title={item.title} categoryVariant="navy" />
+                          </a>
+                        ))}
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <NewsCard size="medium" category="Gündem" title="Devlet refleksinin öne çıktığı başlıklar: güvenlik ve diplomasi bir arada" excerpt="Hükümetin son haftalardaki stratejik hamleleri, iç ve dış politikada yeni bir denge arayışına işaret ediyor." imageUrl={IMG4} />
+                      <div className="space-y-0">
+                        {["Meclis'te yeni güvenlik paketi görüşmeleri başladı", "Cumhurbaşkanlığı'ndan diplomatik temas açıklaması", "Yerel yönetimlerde yeni dönem planlaması", "Ekonomi zirvesinde stratejik kararlar masada"].map((t, i) => (
+                          <NewsCard key={i} size="compact" category="Siyaset" title={t} categoryVariant="navy" />
+                        ))}
+                      </div>
+                    </>
+                  )}
                 </div>
               </section>
 
               {/* Güvenlik */}
               <section>
                 <SectionTitle title="Güvenlik" href="/kategori/guvenlik" accent="navy" />
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-                  <div className="md:col-span-1">
-                    <NewsCard
-                      size="medium"
-                      category="Güvenlik"
-                      title="İç güvenlikte yeni strateji belgesi hazırlanıyor"
-                      imageUrl={IMG5}
-                      categoryVariant="navy"
-                    />
-                  </div>
-                  <div className="md:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {[
-                      "Sınır güvenliğinde teknoloji yatırımları hız kazandı",
-                      "Terörle mücadelede yeni operasyonel başarılar",
-                      "Siber güvenlik altyapısı güçlendiriliyor",
-                    ].map((t, i) => (
-                      <NewsCard key={i} size="small" category="Güvenlik" title={t} categoryVariant="navy" />
-                    ))}
-                  </div>
-                </div>
+                <NewsSection
+                  title="Güvenlik" href="/kategori/guvenlik" accent="navy"
+                  label="Güvenlik" labelVariant="navy"
+                  fallbackImage={IMG5}
+                  items={guvenlik.items} loading={guvenlik.loading}
+                  staticMain={{ title: "İç güvenlikte yeni strateji belgesi hazırlanıyor" }}
+                  staticList={["Sınır güvenliğinde teknoloji yatırımları hız kazandı", "Terörle mücadelede yeni operasyonel başarılar", "Siber güvenlik altyapısı güçlendiriliyor"]}
+                />
               </section>
 
               {/* Savunma */}
               <section>
                 <SectionTitle title="Savunma" href="/kategori/savunma" />
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-                  <div className="md:col-span-1">
-                    <NewsCard
-                      size="medium"
-                      category="Savunma"
-                      title="Milli muharip uçak programında yeni aşamaya geçildi"
-                      imageUrl={IMG2}
-                    />
-                  </div>
-                  <div className="md:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {[
-                      "Deniz kuvvetlerinin yeni nesil fırkateyn projesi",
-                      "İHA teknolojisinde ihracat rekoru kırıldı",
-                      "Savunma sanayii zirvesinden önemli kararlar",
-                    ].map((t, i) => (
-                      <NewsCard key={i} size="small" category="Savunma" title={t} />
-                    ))}
-                  </div>
-                </div>
+                <NewsSection
+                  title="Savunma" href="/kategori/savunma"
+                  label="Savunma"
+                  fallbackImage={IMG2}
+                  items={savunma.items} loading={savunma.loading}
+                  staticMain={{ title: "Milli muharip uçak programında yeni aşamaya geçildi" }}
+                  staticList={["Deniz kuvvetlerinin yeni nesil fırkateyn projesi", "İHA teknolojisinde ihracat rekoru kırıldı", "Savunma sanayii zirvesinden önemli kararlar"]}
+                />
               </section>
 
               {/* Dünya */}
               <section>
                 <SectionTitle title="Dünya" href="/kategori/dunya" accent="navy" />
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-                  <div className="md:col-span-1">
-                    <NewsCard
-                      size="medium"
-                      category="Dünya"
-                      title="Doğu Akdeniz'de enerji denklemi yeniden şekilleniyor"
-                      imageUrl={IMG3}
-                      categoryVariant="navy"
-                    />
-                  </div>
-                  <div className="md:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {[
-                      "Balkanlar'da yeni siyasi denge arayışı",
-                      "Orta Doğu'da diplomasi trafiği yoğunlaştı",
-                      "Türk dünyasıyla ekonomik entegrasyon adımları",
-                    ].map((t, i) => (
-                      <NewsCard key={i} size="small" category="Dünya" title={t} categoryVariant="navy" />
-                    ))}
-                  </div>
-                </div>
+                <NewsSection
+                  title="Dünya" href="/kategori/dunya" accent="navy"
+                  label="Dünya" labelVariant="navy"
+                  fallbackImage={IMG3}
+                  items={dunya.items} loading={dunya.loading}
+                  staticMain={{ title: "Doğu Akdeniz'de enerji denklemi yeniden şekilleniyor" }}
+                  staticList={["Balkanlar'da yeni siyasi denge arayışı", "Orta Doğu'da diplomasi trafiği yoğunlaştı", "Türk dünyasıyla ekonomik entegrasyon adımları"]}
+                />
               </section>
 
               {/* Tarih / Hafıza */}
               <section>
                 <SectionTitle title="Tarih / Hafıza" href="/kategori/tarih" />
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-                  <div className="md:col-span-1">
-                    <NewsCard
-                      size="medium"
-                      category="Tarih"
-                      title="Milli hafızada önemli gün: Cumhuriyet'in kuruluş iradesin yeniden okumak"
-                      imageUrl={IMG6}
-                    />
-                  </div>
-                  <div className="md:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {[
-                      "Osmanlı'dan Cumhuriyet'e geçişin stratejik dersleri",
-                      "Kurtuluş Savaşı'nın bilinmeyen diplomatik boyutu",
-                      "Türk devlet geleneğinde kurumsallaşma",
-                    ].map((t, i) => (
-                      <NewsCard key={i} size="small" category="Tarih" title={t} />
-                    ))}
-                  </div>
-                </div>
+                <NewsSection
+                  title="Tarih / Hafıza" href="/kategori/tarih"
+                  label="Tarih"
+                  fallbackImage={IMG6}
+                  items={tarih.items} loading={tarih.loading}
+                  staticMain={{ title: "Milli hafızada önemli gün: Cumhuriyet'in kuruluş iradesini yeniden okumak" }}
+                  staticList={["Osmanlı'dan Cumhuriyet'e geçişin stratejik dersleri", "Kurtuluş Savaşı'nın bilinmeyen diplomatik boyutu", "Türk devlet geleneğinde kurumsallaşma"]}
+                />
               </section>
 
               {/* Analiz / Dosya */}
@@ -295,7 +413,6 @@ const Index = () => {
 
             {/* Sidebar */}
             <aside className="hidden lg:block space-y-6">
-              {/* Weather & Markets */}
               <div className="bg-card rounded-lg border border-border p-4">
                 <h3 className="text-sm font-bold font-archivo flex items-center gap-1.5 mb-3">
                   <TrendingUp className="h-4 w-4 text-primary" />
@@ -321,7 +438,6 @@ const Index = () => {
                 </div>
               </div>
 
-              {/* En Çok Okunanlar */}
               <div className="bg-card rounded-lg border border-border p-4">
                 <h3 className="text-sm font-bold font-archivo flex items-center gap-1.5 mb-3">
                   <TrendingUp className="h-4 w-4 text-primary" />
@@ -336,18 +452,13 @@ const Index = () => {
                     "Jeopolitikte yeni eşik yaklaşıyor",
                   ].map((t, i) => (
                     <Link key={i} to="/haber/detay" className="group flex gap-3 py-2.5 border-b border-border last:border-0">
-                      <span className="text-lg font-bold font-archivo text-primary/40 w-6 flex-shrink-0">
-                        {i + 1}
-                      </span>
-                      <p className="text-xs font-semibold font-archivo leading-snug group-hover:text-primary transition-colors">
-                        {t}
-                      </p>
+                      <span className="text-lg font-bold font-archivo text-primary/40 w-6 flex-shrink-0">{i + 1}</span>
+                      <p className="text-xs font-semibold font-archivo leading-snug group-hover:text-primary transition-colors">{t}</p>
                     </Link>
                   ))}
                 </div>
               </div>
 
-              {/* Bugün Tarihte / Milli Hafıza */}
               <div className="bg-soft-surface rounded-lg border border-border p-4">
                 <h3 className="text-sm font-bold font-archivo flex items-center gap-1.5 mb-3">
                   <Calendar className="h-4 w-4 text-primary" />
@@ -367,7 +478,6 @@ const Index = () => {
                 </div>
               </div>
 
-              {/* Strategy Notes */}
               <div className="bg-secondary text-secondary-foreground rounded-lg p-4">
                 <h3 className="text-sm font-bold font-archivo flex items-center gap-1.5 mb-3">
                   <Shield className="h-4 w-4" />
@@ -381,7 +491,6 @@ const Index = () => {
                 </Link>
               </div>
 
-              {/* Yazarlar Teaser */}
               <div className="bg-card rounded-lg border border-border p-4">
                 <h3 className="text-sm font-bold font-archivo flex items-center gap-1.5 mb-3">
                   <BookOpen className="h-4 w-4 text-primary" />
@@ -407,7 +516,7 @@ const Index = () => {
           </div>
         </div>
 
-        {/* Milli Hafıza mini module - full width */}
+        {/* Milli Hafıza */}
         <section className="bg-secondary text-secondary-foreground">
           <div className="container py-8">
             <h2 className="text-lg font-bold font-archivo mb-5 flex items-center gap-2">
