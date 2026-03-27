@@ -360,30 +360,6 @@ const Index = () => {
                 </div>
               </section>
 
-              {/* Yazarlar */}
-              <section>
-                <SectionTitle title="Yazarlar" href="/yazarlar" />
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                  {[
-                    { name: "Mehmet Karataş", role: "Güvenlik Analisti", article: "Sınır hattının stratejik önemi" },
-                    { name: "Ayşe Demir", role: "Jeopolitik Uzmanı", article: "Doğu Akdeniz denklemi" },
-                    { name: "Hasan Yılmaz", role: "Tarih Yazarı", article: "Milli hafıza ve devlet geleneği" },
-                    { name: "Elif Aydın", role: "Dış Politika", article: "Diplomasi trafiğinin arka planı" },
-                    { name: "Ali Kaya", role: "Savunma Muhabiri", article: "Yerli savunma hamleleri" },
-                    { name: "Zeynep Arslan", role: "Ekonomi Editörü", article: "Ekonomik bağımsızlık yolu" },
-                  ].map((w, i) => (
-                    <Link key={i} to="/yazarlar" className="group text-center p-4 bg-card rounded-lg border border-border hover:shadow-sm transition-all">
-                      <div className="w-12 h-12 mx-auto rounded-full bg-secondary text-secondary-foreground flex items-center justify-center text-sm font-bold font-archivo mb-2">
-                        {w.name.split(" ").map(n => n[0]).join("")}
-                      </div>
-                      <p className="text-sm font-bold font-archivo">{w.name}</p>
-                      <p className="text-[10px] text-muted-foreground mb-1.5">{w.role}</p>
-                      <p className="text-xs text-foreground group-hover:text-primary transition-colors line-clamp-1">{w.article}</p>
-                    </Link>
-                  ))}
-                </div>
-              </section>
-
               {/* Video Section */}
               <section>
                 <SectionTitle title="Video & Röportaj" accent="navy" />
