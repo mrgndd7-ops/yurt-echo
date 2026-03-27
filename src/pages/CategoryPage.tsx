@@ -89,8 +89,7 @@ const CategoryPage = () => {
           {!loading && pageItems.length > 0 && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {pageItems.map((item, i) => (
-                <a key={i} href={item.link} target="_blank" rel="noopener noreferrer">
-                  <NewsCard
+                <NewsCard
                     size="medium"
                     category={item.category || meta.tag}
                     title={item.title}
@@ -99,8 +98,7 @@ const CategoryPage = () => {
                     author={item.author || undefined}
                     date={item.pubDate ? new Date(item.pubDate).toLocaleDateString("tr-TR", { day: "numeric", month: "long", year: "numeric" }) : undefined}
                     categoryVariant={i % 2 === 0 ? "burgundy" : "navy"}
-                  />
-                </a>
+                  state={item} />
               ))}
             </div>
           )}

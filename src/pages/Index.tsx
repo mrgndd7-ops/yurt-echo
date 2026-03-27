@@ -20,9 +20,6 @@ const IMG5 = "https://images.unsplash.com/photo-1577495508048-b635879837f1?w=800
 const IMG6 = "https://images.unsplash.com/photo-1564769625905-50e93615e769?w=800&q=80";
 
 // RSS item'ı link olarak kullan (dış siteye yönlendir)
-function itemHref(item: RssItem) {
-  return item.link || "/haber/detay";
-}
 
 function formatDate(pubDate: string) {
   if (!pubDate) return "";
@@ -76,7 +73,7 @@ function NewsSection({
     <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
       <div className="md:col-span-1">
         {main ? (
-            <NewsCard href={main.link}
+            <NewsCard state={main}
               size="medium"
               category={label}
               title={main.title}
@@ -102,7 +99,7 @@ function NewsSection({
       <div className="md:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
         {hasRss
           ? rest.map((item, i) => (
-                <NewsCard href={item.link}
+                <NewsCard state={item}
                   size="small"
                   category={label}
                   title={item.title}
@@ -155,7 +152,7 @@ const Index = () => {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
             <div className="lg:col-span-2">
               {heroItem ? (
-                  <NewsCard href={heroItem.link}
+                  <NewsCard state={heroItem}
                     size="large"
                     category={heroItem.category || "Gündem"}
                     title={heroItem.title}
@@ -179,7 +176,7 @@ const Index = () => {
             <div className="flex flex-col gap-4">
               {sideItems.length > 0
                 ? sideItems.map((item, i) => (
-                      <NewsCard href={item.link}
+                      <NewsCard state={item}
                         size="small"
                         category={item.category || "Haber"}
                         title={item.title}
@@ -206,7 +203,7 @@ const Index = () => {
                 ? allItems.map((item, i) => (
                     <a
                       key={i}
-                      href={item.link}
+                      state={item}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="group bg-card rounded-lg p-3 border border-border hover:shadow-sm transition-all hover:-translate-y-0.5"
@@ -252,7 +249,7 @@ const Index = () => {
                     <div className="col-span-2 animate-pulse h-40 bg-muted rounded-lg" />
                   ) : gundem.items.length > 0 ? (
                     <>
-                        <NewsCard href={gundem.items[0].link}
+                        <NewsCard state={gundem.items[0]}
                           size="medium"
                           category="Gündem"
                           title={gundem.items[0].title}
@@ -261,7 +258,7 @@ const Index = () => {
                         />
                       <div className="space-y-0">
                         {gundem.items.slice(1, 5).map((item, i) => (
-                            <NewsCard href={item.link} size="compact" category="Gündem" title={item.title} categoryVariant="navy" />
+                            <NewsCard state={item} size="compact" category="Gündem" title={item.title} categoryVariant="navy" />
                         ))}
                       </div>
                     </>
