@@ -117,6 +117,15 @@ function NewsSection({
   );
 }
 
+const STATIC_STRIP = [
+  { cat: "Gündem",  title: "Ankara'da kritik güvenlik zirvesi başladı" },
+  { cat: "Siyaset", title: "Meclis'te yeni yasa teklifi tartışılıyor" },
+  { cat: "Ekonomi", title: "Merkez Bankası faiz kararını açıkladı" },
+  { cat: "Güvenlik",title: "Sınır hattında dikkat çeken gelişme" },
+  { cat: "Dünya",   title: "Jeopolitikte yeni eşik: Balkan cephesi" },
+  { cat: "Savunma", title: "Savunmada yerli kapasite artıyor" },
+];
+
 const Index = () => {
   const gundem   = useRssFeed(RSS_FEEDS.gundem);
   const siyaset  = useRssFeed(RSS_FEEDS.siyaset);
@@ -201,35 +210,20 @@ const Index = () => {
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
               {allItems.length > 0
                 ? allItems.map((item, i) => (
-                    <a
+                    <Link
                       key={i}
+                      to={`/haber/${encodeURIComponent(item.title.slice(0,60).toLowerCase().replace(/s+/g, "-"))}`}
                       state={item}
-                      target="_blank"
-                      rel="noopener noreferrer"
                       className="group bg-card rounded-lg p-3 border border-border hover:shadow-sm transition-all hover:-translate-y-0.5"
                     >
                       <CategoryTag label={item.category || "Haber"} variant="muted" className="mb-1.5" />
-                      <p className="text-xs font-semibold font-archivo leading-snug line-clamp-2 group-hover:text-primary transition-colors">
-                        {item.title}
-                      </p>
+                      <p className="text-xs font-semibold font-archivo leading-snug line-clamp-2 group-hover:text-primary transition-colors">{item.title}</p>
+                    </Link>
                   ))
-                : [
-                    { cat: "Gündem", title: "Ankara'da kritik güvenlik zirvesi başladı" },
-                    { cat: "Siyaset", title: "Meclis'te yeni yasa teklifi tartışılıyor" },
-                    { cat: "Ekonomi", title: "Merkez Bankası faiz kararını açıkladı" },
-                    { cat: "Güvenlik", title: "Sınır hattında dikkat çeken gelişme" },
-                    { cat: "Dünya", title: "Jeopolitikte yeni eşik: Balkan cephesi" },
-                    { cat: "Savunma", title: "Savunmada yerli kapasite artıyor" },
-                  ].map((item, i) => (
-                    <Link
-                      key={i}
-                      to="/haber/detay"
-                      className="group bg-card rounded-lg p-3 border border-border hover:shadow-sm transition-all hover:-translate-y-0.5"
-                    >
+                : STATIC_STRIP.map((item, i) => (
+                    <Link key={i} to="/haber/detay" className="group bg-card rounded-lg p-3 border border-border hover:shadow-sm transition-all hover:-translate-y-0.5">
                       <CategoryTag label={item.cat} variant="muted" className="mb-1.5" />
-                      <p className="text-xs font-semibold font-archivo leading-snug line-clamp-2 group-hover:text-primary transition-colors">
-                        {item.title}
-                      </p>
+                      <p className="text-xs font-semibold font-archivo leading-snug line-clamp-2 group-hover:text-primary transition-colors">{item.title}</p>
                     </Link>
                   ))}
             </div>
