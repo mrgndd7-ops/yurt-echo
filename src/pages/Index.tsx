@@ -450,30 +450,6 @@ const Index = () => {
           </div>
         </div>
 
-        {/* Milli Hafıza */}
-        <section className="bg-secondary text-secondary-foreground">
-          <div className="container py-8">
-            <h2 className="text-lg font-bold font-archivo mb-5 flex items-center gap-2">
-              <span className="w-1 h-5 rounded-full bg-primary" />
-              Milli Hafıza & Strateji
-            </h2>
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-              {[
-                { icon: Calendar, label: "Bugün Tarihte", desc: "26 Mart'ın tarihteki yeri" },
-                { icon: BookOpen, label: "Milli Hafıza", desc: "Unutulmaması gereken günler" },
-                { icon: TrendingUp, label: "Jeopolitik Notlar", desc: "Bölgesel güç dengesi" },
-                { icon: MapPin, label: "Sınır Hattı", desc: "Güncel sınır gelişmeleri" },
-                { icon: Landmark, label: "Devlet ve Strateji", desc: "Kurumsal hafıza arşivi" },
-              ].map((item, i) => (
-                <Link key={i} to="/kategori/tarih" className="group bg-secondary-foreground/5 rounded-lg p-4 hover:bg-secondary-foreground/10 transition-colors">
-                  <item.icon className="h-5 w-5 text-primary mb-2" />
-                  <p className="text-sm font-bold font-archivo">{item.label}</p>
-                  <p className="text-xs text-secondary-foreground/60 mt-1">{item.desc}</p>
-                </Link>
-              ))}
-            </div>
-          </div>
-        </section>
       </main>
 
       <Footer />
