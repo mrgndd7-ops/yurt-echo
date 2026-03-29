@@ -9,7 +9,8 @@ import ArticleDetail from "./pages/ArticleDetail.tsx";
 import CategoryPage from "./pages/CategoryPage.tsx";
 import Yazarlar from "./pages/Yazarlar.tsx";
 import Menu from "./pages/Menu.tsx";
-import BugunTarihte from "./pages/BugunTarihte.tsx";n            <Route path="/yazarlar" element=\{<Yazarlar />\} />
+import BugunTarihte from "./pages/BugunTarihte.tsx";
+import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -34,6 +35,7 @@ const App = () => (
             <Route path="/kategori/:slug" element={<CategoryPage />} />
             <Route path="/yazarlar" element={<Yazarlar />} />
             <Route path="/menu" element={<Menu />} />
+            <Route path="/bugun-tarihte" element={<BugunTarihte />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
