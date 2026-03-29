@@ -13,5 +13,5 @@ export const RSS_FEEDS: Record<string, string | string[]> = {
   dunya: 'https://www.dirilispostasi.com/rss/dunya',
   ekonomi: 'https://www.yenisafak.com/rss-feeds?category=turkiye-ekonomisi',
   tarih: 'https://www.ahaber.com.tr/rss/tarih.xml',
-  analiz: 'https://www.dirilispostasi.com/rss/analiz-yorum',
+  analiz: 'https://www.dirilispostasi.com/rss/yorum',
 };
