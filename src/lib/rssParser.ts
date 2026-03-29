@@ -8,7 +8,7 @@ export interface RssItem {
   category?: string;
 }
 
-const CORS_PROXY = "https://api.allorigins.win/get?url=";
+const CORS_PROXY = "/api/rss?url=";
 const MAX_AGE_DAYS = 30;
 
 export async function fetchRssFeed(url: string): Promise<RssItem[]> {
