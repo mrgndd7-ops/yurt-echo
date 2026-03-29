@@ -14,7 +14,7 @@ const Footer = () => {
       <div className="container py-10">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
           <div className="space-y-3">
-            <img src={logo} alt="Yurt Medya" className="h-10 w-auto brightness-0 invert" />
+            <img src={logo} alt="Yurt Medya" className="h-14 md:h-16 w-auto brightness-0 invert" />
             <p className="text-sm text-secondary-foreground/70 font-inter italic">
               Milletin hafızası, memleketin gündemi
             </p>

@@ -22,7 +22,7 @@ const Header = () => {
         {/* Main header row */}
         <div className="flex items-center justify-between py-3">
           <Link to="/" className="flex-shrink-0">
-            <img src={logo} alt="Yurt" className="h-10 md:h-12 w-auto" />
+            <img src={logo} alt="Yurt" className="h-14 md:h-16 w-auto" />
           </Link>
 
           {/* Desktop nav */}
