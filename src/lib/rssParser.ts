@@ -39,8 +39,11 @@ export async function fetchRssFeed(url: string): Promise<RssItem[]> {
 }
 
 function getByTag(item: Element, tag: string): string {
-  return item.getElementsByTagName(tag)[0]?.getAttribute("url")
-    ?? item.getElementsByTagName(tag)[0]?.textContent?.trim()
+  const el = item.getElementsByTagName(tag)[0];
+  if (!el) return "";
+  return el.getAttribute("url")
+    ?? el.getElementsByTagName("url")[0]?.textContent?.trim()
+    ?? el.textContent?.trim()
     ?? "";
 }
 
