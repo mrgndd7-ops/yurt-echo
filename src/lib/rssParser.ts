@@ -9,7 +9,6 @@ export interface RssItem {
 }
 
 const CORS_PROXY = "/api/rss?url=";
-const MAX_AGE_DAYS = 30;
 
 export async function fetchRssFeed(url: string): Promise<RssItem[]> {
   const res = await fetch(`${CORS_PROXY}${encodeURIComponent(url)}`);
@@ -22,27 +21,19 @@ export async function fetchRssFeed(url: string): Promise<RssItem[]> {
   const xml = parser.parseFromString(data.contents, "text/xml");
   const items = Array.from(xml.querySelectorAll("item"));
 
-  const cutoff = Date.now() - MAX_AGE_DAYS * 24 * 60 * 60 * 1000;
-
   return items
     .map((item) => {
       const get = (tag: string) => item.querySelector(tag)?.textContent?.trim() ?? "";
-      const pubDate = get("pubDate");
       const content = item.querySelector("encoded")?.textContent ?? get("description");
       return {
         title: get("title"),
         link: get("link"),
         description: stripHtml(get("description")).slice(0, 200),
-        pubDate,
+        pubDate: get("pubDate"),
         imageUrl: resolveImageFromItem(item, content),
         author: get("author") || get("creator"),
         category: get("category"),
       };
-    })
-    .filter((item) => {
-      if (!item.pubDate) return true;
-      const t = new Date(item.pubDate).getTime();
-      return isNaN(t) || t >= cutoff;
     })
     .slice(0, 20);
 }
