@@ -38,13 +38,21 @@ export async function fetchRssFeed(url: string): Promise<RssItem[]> {
     .slice(0, 20);
 }
 
+function getByTag(item: Element, tag: string): string {
+  return item.getElementsByTagName(tag)[0]?.getAttribute("url")
+    ?? item.getElementsByTagName(tag)[0]?.textContent?.trim()
+    ?? "";
+}
+
 function resolveImageFromItem(item: Element, content: string): string {
-  const enclosure = item.querySelector("enclosure")?.getAttribute("url") ?? "";
-  const mediaThumbnail = item.querySelector("thumbnail")?.getAttribute("url") ?? "";
   const candidates = [
-    enclosure,
-    mediaThumbnail,
+    item.querySelector("enclosure")?.getAttribute("url") ?? "",
+    getByTag(item, "media:thumbnail"),
+    getByTag(item, "thumbnail"),
+    getByTag(item, "media:content"),
+    getByTag(item, "image"),
     extractImage(content),
+    extractImage(item.querySelector("description")?.textContent ?? ""),
   ];
   return candidates.find(isValidImage) ?? "";
 }
