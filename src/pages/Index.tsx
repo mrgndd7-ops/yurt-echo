@@ -7,6 +7,7 @@ import NewsCard from "@/components/news/NewsCard";
 import SectionTitle from "@/components/news/SectionTitle";
 import CategoryTag from "@/components/news/CategoryTag";
 import { Clock, Play, TrendingUp, Calendar, Shield, BookOpen, MapPin, Landmark } from "lucide-react";
+import { useMarketData } from "@/hooks/useMarketData";
 import { Link } from "react-router-dom";
 import { useRssFeed } from "@/hooks/useRssFeed";
 import { useOnThisDay } from "@/hooks/useOnThisDay";
@@ -129,6 +130,7 @@ const STATIC_STRIP = [
 
 const Index = () => {
   const onThisDay = useOnThisDay(4);
+  const market = useMarketData();
   const gundem   = useRssFeed(RSS_FEEDS.gundem);
   const siyaset  = useRssFeed(RSS_FEEDS.siyaset);
   const guvenlik = useRssFeed(RSS_FEEDS.guvenlik);
@@ -372,22 +374,23 @@ const Index = () => {
                   Piyasalar
                 </h3>
                 <div className="space-y-2 text-sm">
-                  {[
-                    { label: "Dolar/TL", value: "38,42", change: "+0.12%" },
-                    { label: "Euro/TL", value: "41,18", change: "-0.08%" },
-                    { label: "Altın", value: "3.284", change: "+0.45%" },
-                    { label: "BIST 100", value: "12.450", change: "+1.2%" },
-                  ].map((m, i) => (
-                    <div key={i} className="flex justify-between items-center py-1.5 border-b border-border last:border-0">
-                      <span className="text-muted-foreground">{m.label}</span>
-                      <div className="text-right">
-                        <span className="font-semibold">{m.value}</span>
-                        <span className={`ml-1.5 text-xs ${m.change.startsWith("+") ? "text-green-600" : "text-red-500"}`}>
-                          {m.change}
-                        </span>
-                      </div>
+                  {market.loading ? (
+                    <div className="animate-pulse space-y-2">
+                      {[1,2,3,4].map(i => <div key={i} className="h-7 bg-muted rounded" />)}
                     </div>
-                  ))}
+                  ) : (
+                    market.data.map((m, i) => (
+                      <div key={i} className="flex justify-between items-center py-1.5 border-b border-border last:border-0">
+                        <span className="text-muted-foreground">{m.label}</span>
+                        <div className="text-right">
+                          <span className="font-semibold">{m.value}</span>
+                          <span className={`ml-1.5 text-xs ${m.change.startsWith("+") ? "text-green-600" : "text-red-500"}`}>
+                            {m.change}
+                          </span>
+                        </div>
+                      </div>
+                    ))
+                  )}
                 </div>
               </div>
 
