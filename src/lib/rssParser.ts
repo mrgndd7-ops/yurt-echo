@@ -12,7 +12,7 @@ const RSS2JSON = "https://api.rss2json.com/v1/api.json?rss_url=";
 const MAX_AGE_DAYS = 30;
 
 export async function fetchRssFeed(url: string): Promise<RssItem[]> {
-  const res = await fetch(`${RSS2JSON}${encodeURIComponent(url)}&count=20&_=${Date.now()}`);
+  const res = await fetch(`${RSS2JSON}${encodeURIComponent(url)}&count=20`);
   if (!res.ok) throw new Error(`RSS fetch hatası: ${res.status}`);
 
   const data = await res.json();
