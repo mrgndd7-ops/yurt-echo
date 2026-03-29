@@ -8,16 +8,11 @@ export interface RssItem {
   category?: string;
 }
 
-const RSS2JSON = "https://api.rss2json.com/v1/api.json";
+const RSS2JSON = "https://api.rss2json.com/v1/api.json?rss_url=";
 const MAX_AGE_DAYS = 30;
 
 export async function fetchRssFeed(url: string): Promise<RssItem[]> {
-  const params = new URLSearchParams({
-    rss_url: url,
-    count: "30",
-    _: Date.now().toString(),
-  });
-  const res = await fetch(`${RSS2JSON}?${params}`);
+  const res = await fetch(`${RSS2JSON}${encodeURIComponent(url)}&count=20&_=${Date.now()}`);
   if (!res.ok) throw new Error(`RSS fetch hatası: ${res.status}`);
 
   const data = await res.json();
