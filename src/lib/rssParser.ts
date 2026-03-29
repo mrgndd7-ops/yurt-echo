@@ -8,24 +8,39 @@ export interface RssItem {
   category?: string;
 }
 
-const RSS2JSON = "https://api.rss2json.com/v1/api.json?rss_url=";
+const RSS2JSON = "https://api.rss2json.com/v1/api.json";
+const MAX_AGE_DAYS = 30;
 
 export async function fetchRssFeed(url: string): Promise<RssItem[]> {
-  const res = await fetch(`${RSS2JSON}${encodeURIComponent(url)}`);
+  const params = new URLSearchParams({
+    rss_url: url,
+    count: "30",
+    _: Date.now().toString(),
+  });
+  const res = await fetch(`${RSS2JSON}?${params}`);
   if (!res.ok) throw new Error(`RSS fetch hatası: ${res.status}`);
 
   const data = await res.json();
   if (data.status !== "ok") throw new Error("RSS parse hatası");
 
-  return (data.items as any[]).slice(0, 20).map((item) => ({
-    title: item.title ?? "",
-    link: item.link ?? "",
-    description: stripHtml(item.description ?? "").slice(0, 200),
-    pubDate: item.pubDate ?? "",
-    imageUrl: resolveImage(item),
-    author: item.author ?? "",
-    category: item.categories?.[0] ?? "",
-  }));
+  const cutoff = Date.now() - MAX_AGE_DAYS * 24 * 60 * 60 * 1000;
+
+  return (data.items as any[])
+    .filter((item) => {
+      if (!item.pubDate) return true;
+      const t = new Date(item.pubDate).getTime();
+      return isNaN(t) || t >= cutoff;
+    })
+    .slice(0, 20)
+    .map((item) => ({
+      title: item.title ?? "",
+      link: item.link ?? "",
+      description: stripHtml(item.description ?? "").slice(0, 200),
+      pubDate: item.pubDate ?? "",
+      imageUrl: resolveImage(item),
+      author: item.author ?? "",
+      category: item.categories?.[0] ?? "",
+    }));
 }
 
 function resolveImage(item: any): string {
