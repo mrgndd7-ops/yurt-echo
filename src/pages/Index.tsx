@@ -135,6 +135,7 @@ const Index = () => {
   const savunma  = useRssFeed(RSS_FEEDS.savunma);
   const dunya    = useRssFeed(RSS_FEEDS.dunya);
   const tarih    = useRssFeed(RSS_FEEDS.tarih);
+  const analiz   = useRssFeed(RSS_FEEDS.analiz);
 
   // Hero: ilk dolu feed'den al
   const heroFeed = [gundem, guvenlik, savunma, dunya].find(f => f.items.length > 0);
@@ -324,20 +325,16 @@ const Index = () => {
               </section>
 
               {/* Analiz / Dosya */}
-              <section className="bg-soft-surface rounded-lg p-5 border border-border">
+              <section>
                 <SectionTitle title="Analiz & Dosya" href="/kategori/analiz" accent="navy" />
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                  {[
-                    { title: "Jeopolitikte yeni eşik: Türkiye'nin çok cepheli stratejisi", author: "Prof. Dr. Ayşe Demir" },
-                    { title: "Enerji güvenliği ve milli bağımsızlık ilişkisi", author: "Doç. Dr. Hasan Yılmaz" },
-                  ].map((item, i) => (
-                    <Link key={i} to="/haber/detay" className="group bg-card rounded-lg p-4 border border-border hover:shadow-sm transition-all">
-                      <CategoryTag label="Analiz" variant="navy" className="mb-2" />
-                      <h3 className="text-base font-bold font-archivo group-hover:text-primary transition-colors">{item.title}</h3>
-                      <p className="text-xs text-muted-foreground mt-2">{item.author}</p>
-                    </Link>
-                  ))}
-                </div>
+                <NewsSection
+                  title="Analiz" href="/kategori/analiz" accent="navy"
+                  label="Analiz" labelVariant="navy"
+                  fallbackImage={IMG4}
+                  items={analiz.items} loading={analiz.loading}
+                  staticMain={{ title: "Jeopolitikte yeni eşik: Türkiye'nin çok cepheli stratejisi" }}
+                  staticList={["Enerji güvenliği ve milli bağımsızlık ilişkisi", "Doğu Akdeniz'de güç dengesi", "Savunma sanayiinde dönüşüm"]}
+                />
               </section>
 
               {/* Video Section */}
