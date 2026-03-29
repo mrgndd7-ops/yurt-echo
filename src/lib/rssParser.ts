@@ -8,42 +8,52 @@ export interface RssItem {
   category?: string;
 }
 
-const RSS2JSON = "https://api.rss2json.com/v1/api.json?rss_url=";
+const CORS_PROXY = "https://api.allorigins.win/get?url=";
 const MAX_AGE_DAYS = 30;
 
 export async function fetchRssFeed(url: string): Promise<RssItem[]> {
-  const res = await fetch(`${RSS2JSON}${encodeURIComponent(url)}&count=20`);
+  const res = await fetch(`${CORS_PROXY}${encodeURIComponent(url)}`);
   if (!res.ok) throw new Error(`RSS fetch hatası: ${res.status}`);
 
   const data = await res.json();
-  if (data.status !== "ok") throw new Error("RSS parse hatası");
+  if (!data.contents) throw new Error("RSS içeriği alınamadı");
+
+  const parser = new DOMParser();
+  const xml = parser.parseFromString(data.contents, "text/xml");
+  const items = Array.from(xml.querySelectorAll("item"));
 
   const cutoff = Date.now() - MAX_AGE_DAYS * 24 * 60 * 60 * 1000;
 
-  return (data.items as any[])
+  return items
+    .map((item) => {
+      const get = (tag: string) => item.querySelector(tag)?.textContent?.trim() ?? "";
+      const pubDate = get("pubDate");
+      const content = item.querySelector("encoded")?.textContent ?? get("description");
+      return {
+        title: get("title"),
+        link: get("link"),
+        description: stripHtml(get("description")).slice(0, 200),
+        pubDate,
+        imageUrl: resolveImageFromItem(item, content),
+        author: get("author") || get("creator"),
+        category: get("category"),
+      };
+    })
     .filter((item) => {
       if (!item.pubDate) return true;
       const t = new Date(item.pubDate).getTime();
       return isNaN(t) || t >= cutoff;
     })
-    .slice(0, 20)
-    .map((item) => ({
-      title: item.title ?? "",
-      link: item.link ?? "",
-      description: stripHtml(item.description ?? "").slice(0, 200),
-      pubDate: item.pubDate ?? "",
-      imageUrl: resolveImage(item),
-      author: item.author ?? "",
-      category: item.categories?.[0] ?? "",
-    }));
+    .slice(0, 20);
 }
 
-function resolveImage(item: any): string {
+function resolveImageFromItem(item: Element, content: string): string {
+  const enclosure = item.querySelector("enclosure")?.getAttribute("url") ?? "";
+  const mediaThumbnail = item.querySelector("thumbnail")?.getAttribute("url") ?? "";
   const candidates = [
-    item.thumbnail,
-    item.enclosure?.link,
-    extractImage(item.content ?? ""),
-    extractImage(item.description ?? ""),
+    enclosure,
+    mediaThumbnail,
+    extractImage(content),
   ];
   return candidates.find(isValidImage) ?? "";
 }
